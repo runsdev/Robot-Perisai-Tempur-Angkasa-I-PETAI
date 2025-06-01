@@ -1,0 +1,15 @@
+[project]
+name = "robot-perisai-tempur-angkasa-i-petai"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "numpy>=2.2.6",
+    "pygame>=2.6.1",
+]
+
+[dependency-groups]
+dev = [
+    "nuitka>=2.7.5",
+]

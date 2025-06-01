@@ -1,0 +1,47 @@
+name: Build and Release
+run-name: build-release-${{ inputs.tag_name }}
+
+on:
+  workflow_dispatch:
+    inputs:
+      tag_name:
+        required: true
+        type: string
+        description: "The tag name to release"
+
+permissions:
+  contents: write
+
+jobs:
+  build-release:
+    runs-on: windows-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v5
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version-file: "pyproject.toml"
+
+      - name: Activate virtual environment and install dependencies
+        run: |
+          uv venv
+          .venv\Scripts\activate.ps1
+          uv sync --dev
+
+      - name: Build the project
+        run: |
+          .venv\Scripts\activate.ps1
+          python -m nuitka --onefile --assume-yes-for-downloads --windows-console-mode=disable --output-dir=build --output-filename="petai_${{ inputs.tag_name }}.exe" ./main.py
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: v${{ inputs.tag_name }}
+          files: build/petai_${{ inputs.tag_name }}.exe
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
